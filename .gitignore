@@ -1,0 +1,12 @@
+.venv/
+__pycache__/
+*.pyc
+
+data/raw/
+data/materials/
+data/writing/
+data/scores/score.json
+
+config/user_profile.md
+
+.DS_Store
