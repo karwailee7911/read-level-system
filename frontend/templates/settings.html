@@ -19,8 +19,7 @@
     {{ message }}
     <section class="hero compact">
       <span class="eyebrow">目标设置</span>
-      <h1>设置你的当前目标</h1>
-      <p>首页会根据这个目标判断你的薄弱项和下一步任务。</p>
+      <h1>写下你现在最想达成的目标。</h1>
     </section>
     <section class="panel">
       <form method="post" action="/api/settings/profile" class="form">
@@ -28,24 +27,6 @@
         <textarea name="goal" rows="5">{{ goal }}</textarea>
         <button type="submit">保存目标</button>
       </form>
-    </section>
-    <section class="panel">
-      <h2>四维能力说明</h2>
-      <ul class="simple-list">
-        <li><strong>认知力</strong>：理解问题、提炼概念、提出质疑、连接现实。</li>
-        <li><strong>表达力</strong>：用自己的话讲清楚，形成可输出内容。</li>
-        <li><strong>商业力</strong>：发现需求、场景、产品、流量或行动机会。</li>
-        <li><strong>英语力</strong>：积累词汇、句式、阅读理解和表达练习。</li>
-      </ul>
-    </section>
-    <section class="panel">
-      <h2>评分原则</h2>
-      <ul class="simple-list">
-        <li>没有证据，不加分。</li>
-        <li>只摘要，少加分。</li>
-        <li>有输出、有复盘、有行动，才加分。</li>
-        <li>单次单项最高 +0.5%。</li>
-      </ul>
     </section>
   </main>
 </body>

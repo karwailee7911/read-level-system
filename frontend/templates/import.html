@@ -21,16 +21,16 @@
 
     <section class="hero compact">
       <span class="eyebrow">导入资料</span>
-      <h1>先把资料放进系统，再开始写证据。</h1>
-      <p>导入只提取原文，不自动加分。成长需要你后续的笔记和输出。</p>
+      <h1>把资料放进来。</h1>
     </section>
 
     <section class="grid two">
       <article class="panel">
         <h2>上传 PDF</h2>
+        {{ pdf_note }}
         <form method="post" action="/api/import/pdf" enctype="multipart/form-data" class="form">
-          <label>资料标题，可不填</label>
-          <input name="title" type="text" placeholder="例如：原则">
+          <label>标题</label>
+          <input name="title" type="text" placeholder="可不填">
           <label>PDF 文件</label>
           <input name="file" type="file" accept=".pdf" required>
           <button type="submit">导入 PDF</button>
@@ -40,11 +40,11 @@
       <article class="panel">
         <h2>上传公众号文章</h2>
         <form method="post" action="/api/import/article" enctype="multipart/form-data" class="form">
-          <label>文章标题，可不填</label>
-          <input name="title" type="text" placeholder="默认读取文章标题">
+          <label>标题</label>
+          <input name="title" type="text" placeholder="可不填">
           <label>Markdown 或 txt 文件</label>
           <input name="file" type="file" accept=".md,.txt" required>
-          <button type="submit">导入文章文件</button>
+          <button type="submit">导入文章</button>
         </form>
       </article>
     </section>
@@ -52,11 +52,11 @@
     <section class="panel">
       <h2>直接粘贴文章</h2>
       <form method="post" action="/api/import/article-text" class="form">
-        <label>文章标题</label>
-        <input name="title" type="text" placeholder="例如：一篇关于商业判断的文章">
+        <label>标题</label>
+        <input name="title" type="text" placeholder="可不填">
         <label>文章内容</label>
-        <textarea name="content" rows="14" placeholder="把公众号文章正文粘贴到这里" required></textarea>
-        <button type="submit">导入粘贴内容</button>
+        <textarea name="content" rows="14" placeholder="粘贴正文" required></textarea>
+        <button type="submit">导入</button>
       </form>
     </section>
   </main>

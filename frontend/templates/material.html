@@ -19,40 +19,44 @@
     </nav>
     {{ message }}
 
-    <section class="hero compact">
-      <span class="eyebrow">{{ type }} · {{ imported_at }}</span>
+    <section class="material-title">
+      <span>{{ type }} · {{ imported_at }}</span>
       <h1>{{ title }}</h1>
-      <p>这里才是你写东西的地方。导入的原文在左边，你自己的证据写在右边。</p>
+      <form method="post" action="/api/materials/{{ id }}/delete" onsubmit="return confirm('确定删除这份资料？此操作不可恢复。');">
+        <button type="submit">删除此资料</button>
+      </form>
     </section>
 
     <section class="workspace">
       <aside class="source-panel">
-        <h2>原文预览</h2>
-        <pre>{{ source_preview }}</pre>
+        <div class="section-head">
+          <h2>原文</h2>
+        </div>
+        <article class="source-body">
+          {{ source_html }}
+        </article>
       </aside>
 
       <section class="editor-panel">
-        <div class="tabs">
-          <button type="button" data-tab="notes" class="active">结构化笔记</button>
-          <button type="button" data-tab="draft">文章草稿</button>
+        <div class="section-head">
+          <h2>写</h2>
         </div>
 
-        <div data-tab-panel="notes">
-          {{ note_editors }}
-        </div>
+        <section class="editor-card single-editor">
+          <form method="post" action="/api/materials/{{ id }}/capture">
+            <textarea name="content" rows="12" placeholder="直接写。"></textarea>
+            <button type="submit">保存</button>
+          </form>
+        </section>
 
-        <div data-tab-panel="draft" hidden>
-          <section class="editor-card">
-            <h3>文章草稿</h3>
-            <form method="post" action="/api/materials/{{ id }}/outputs/draft">
-              <textarea name="content" rows="18" placeholder="把这份资料转成一段真实输出。">{{ draft }}</textarea>
-              <button type="submit">保存草稿</button>
-            </form>
-          </section>
-        </div>
+        <section class="saved-panel">
+          <div class="section-head">
+            <h2>已归档</h2>
+          </div>
+          {{ saved_preview }}
+        </section>
       </section>
     </section>
   </main>
 </body>
 </html>
-

@@ -29,7 +29,6 @@
       <article class="panel focus">
         <div class="panel-head">
           <span>{{ state_label }}</span>
-          <code>confidence: {{ confidence }}</code>
         </div>
         <h2>{{ weak_ability }}</h2>
         <p>{{ reason }}</p>
@@ -40,28 +39,16 @@
         <div class="actions">
           <a class="button primary" href="/import">导入资料</a>
           <a class="button" href="/materials">打开资料库</a>
+          <form method="post" action="/api/score/rebuild">
+            <button type="submit">刷新判断</button>
+          </form>
         </div>
       </article>
 
       <aside class="panel">
-        <h2>评分证据</h2>
+        <h2>判断依据</h2>
         {{ evidence_html }}
       </aside>
-    </section>
-
-    <section class="grid three">
-      <a class="entry" href="/import">
-        <strong>1. 导入资料</strong>
-        <span>上传 PDF，或粘贴公众号文章。</span>
-      </a>
-      <a class="entry" href="/materials">
-        <strong>2. 写结构化笔记</strong>
-        <span>在单份资料页写现实启发、行动和选题。</span>
-      </a>
-      <a class="entry" href="/writing">
-        <strong>3. 写草稿</strong>
-        <span>把阅读转成 300 字以上的真实输出。</span>
-      </a>
     </section>
 
     <section class="grid two">

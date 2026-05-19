@@ -1,12 +1,43 @@
-.venv/
+# macOS
+.DS_Store
+
+# Python
 __pycache__/
-*.pyc
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.venv/
+venv/
+env/
 
-data/raw/
-data/materials/
+# Local runtime data: do not commit personal reading material or private notes.
+data/raw/*
+!data/raw/README.md
+!data/raw/.gitkeep
+!data/raw/pdf/
+!data/raw/pdf/.gitkeep
+data/raw/pdf/*
+!data/raw/pdf/.gitkeep
+!data/raw/articles/
+!data/raw/articles/.gitkeep
+data/raw/articles/*
+!data/raw/articles/.gitkeep
+
+data/materials/*
+!data/materials/.gitkeep
+
 data/writing/
-data/scores/score.json
+data/writing/drafts/*
+!data/writing/drafts/.gitkeep
 
+data/scores/score.json
+!data/scores/score.example.json
+!data/scores/.gitkeep
+
+# Personal profile. Keep the example instead.
 config/user_profile.md
 
-.DS_Store
+# Local logs and temporary files.
+*.log
+tmp/

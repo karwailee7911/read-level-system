@@ -31,12 +31,19 @@ def main() -> None:
     if not input_path.exists():
         raise SystemExit(f"Article not found: {input_path}")
 
-    material = import_article_upload(input_path.name, input_path.read_bytes(), args.title)
-    print(f"Imported article: {material['title']}")
+    material = import_article_upload(
+        input_path.name,
+        input_path.read_bytes(),
+        args.title,
+        source_path=input_path,
+    )
+    if material.get("duplicated"):
+        print(f"Already imported: {material['title']}")
+    else:
+        print(f"Imported article: {material['title']}")
     print(f"Material page: http://127.0.0.1:8765/materials/{material['id']}")
     print(f"Local folder: data/materials/{material['id']}")
 
 
 if __name__ == "__main__":
     main()
-

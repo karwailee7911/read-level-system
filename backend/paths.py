@@ -19,6 +19,9 @@ SCORES_DIR = DATA_DIR / "scores"
 SCORE_PATH = SCORES_DIR / "score.json"
 CONFIG_DIR = PROJECT_ROOT / "config"
 USER_PROFILE_PATH = CONFIG_DIR / "user_profile.md"
+ARTICLE_LIBRARY_DIRS = [
+    Path("/Users/karwai/Documents/哥飞-养网站防老"),
+]
 
 
 def ensure_project_dirs() -> None:
@@ -34,4 +37,3 @@ def ensure_project_dirs() -> None:
         CONFIG_DIR,
     ]:
         path.mkdir(parents=True, exist_ok=True)
-

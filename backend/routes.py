@@ -6,17 +6,23 @@ from http.server import BaseHTTPRequestHandler
 from pathlib import Path
 from urllib.parse import parse_qs, quote, unquote, urlparse
 
-from backend.import_service import import_article_text, import_article_upload, import_pdf_upload
+from backend.import_service import import_article_text, import_article_upload, import_pdf_upload, pdf_import_available
 from backend.material_service import (
+    append_note,
+    classify_note_type,
+    delete_material,
+    find_external_asset,
     get_draft,
     get_material,
     get_source,
     list_materials,
     materials_list_html,
-    note_editors_html,
     recent_materials_html,
+    render_source_html,
     save_draft,
     save_note,
+    source_is_english,
+    unified_capture_preview_html,
 )
 from backend.paths import DRAFTS_DIR, STATIC_DIR
 from backend.profile_service import get_goal, get_profile_text, save_goal
@@ -37,6 +43,9 @@ class ReadLevelHandler(BaseHTTPRequestHandler):
 
         if path.startswith("/static/"):
             self.serve_static(path)
+            return
+        if path.startswith("/materials/") and "/assets/" in path:
+            self.serve_material_asset(path)
             return
         if path == "/":
             self.page_dashboard(query)
@@ -76,6 +85,12 @@ class ReadLevelHandler(BaseHTTPRequestHandler):
             if path.startswith("/api/materials/") and "/notes/" in path:
                 self.action_save_note(path)
                 return
+            if path.startswith("/api/materials/") and path.endswith("/capture"):
+                self.action_capture_note(path)
+                return
+            if path.startswith("/api/materials/") and path.endswith("/delete"):
+                self.action_delete_material(path)
+                return
             if path.startswith("/api/materials/") and path.endswith("/outputs/draft"):
                 self.action_save_draft(path)
                 return
@@ -89,7 +104,7 @@ class ReadLevelHandler(BaseHTTPRequestHandler):
                 self.action_rebuild_score()
                 return
         except Exception as exc:
-            self.redirect(f"/?msg={quote('操作失败：' + str(exc))}")
+            self.redirect(f"/?msg={quote(self.format_error_message(exc))}")
             return
 
         self.not_found()
@@ -152,7 +167,6 @@ class ReadLevelHandler(BaseHTTPRequestHandler):
                     "goal": h(score.get("profile", {}).get("goal", "")),
                     "state_label": h(status["label"]),
                     "weak_ability": h(status["ability"]),
-                    "confidence": h(status["confidence"]),
                     "reason": h(status["reason"]),
                     "next_task": h(status["next_task"]),
                     "evidence_html": status["evidence"],
@@ -163,7 +177,16 @@ class ReadLevelHandler(BaseHTTPRequestHandler):
         )
 
     def page_import(self, query: dict[str, list[str]]) -> None:
-        self.send_html(render_template("import.html", {"message": self.message_html(query)}))
+        pdf_available = pdf_import_available()
+        self.send_html(
+            render_template(
+                "import.html",
+                {
+                    "message": self.message_html(query),
+                    "pdf_note": "" if pdf_available else '<p class="micro-note">PDF 依赖还没装好，提交后会提示安装。</p>',
+                },
+            )
+        )
 
     def page_materials(self, query: dict[str, list[str]]) -> None:
         materials = list_materials()
@@ -185,8 +208,8 @@ class ReadLevelHandler(BaseHTTPRequestHandler):
             return
 
         source = get_source(mid)
-        source_preview = h(source[:5000] + ("\n\n..." if len(source) > 5000 else ""))
-        draft = h(get_draft(mid))
+        english_allowed = source_is_english(source)
+        source_html = render_source_html(source, f"/materials/{h(mid)}/assets")
         self.send_html(
             render_template(
                 "material.html",
@@ -196,12 +219,28 @@ class ReadLevelHandler(BaseHTTPRequestHandler):
                     "title": h(material.get("title", "未命名资料")),
                     "type": h(material.get("type", "")),
                     "imported_at": h(material.get("imported_at", "")),
-                    "source_preview": source_preview,
-                    "note_editors": note_editors_html(mid),
-                    "draft": draft,
+                    "source_html": source_html,
+                    "saved_preview": unified_capture_preview_html(mid, english_allowed),
                 },
             )
         )
+
+    def serve_material_asset(self, path: str) -> None:
+        prefix, _, rel = path.partition("/assets/")
+        mid = unquote(prefix.strip("/").split("/", 1)[1])
+        relative_path = unquote(rel)
+        target = find_external_asset(mid, relative_path)
+        if not target or not target.exists():
+            self.not_found()
+            return
+
+        data = target.read_bytes()
+        content_type = mimetypes.guess_type(str(target))[0] or "application/octet-stream"
+        self.send_response(200)
+        self.send_header("Content-Type", content_type)
+        self.send_header("Content-Length", str(len(data)))
+        self.end_headers()
+        self.wfile.write(data)
 
     def page_writing(self, query: dict[str, list[str]]) -> None:
         inbox_path = DRAFTS_DIR / "inbox.md"
@@ -232,6 +271,16 @@ class ReadLevelHandler(BaseHTTPRequestHandler):
         if not msg:
             return ""
         return f'<div class="notice">{h(msg)}</div>'
+
+    def format_error_message(self, exc: Exception) -> str:
+        text = str(exc)
+        if "缺少 PDF 解析依赖" in text:
+            return "缺少 PDF 解析依赖，请先运行：pip install -r requirements.txt"
+        if "PDF 解析失败" in text:
+            return "PDF 解析失败。请确认文件不是损坏、加密或扫描版 PDF。"
+        if "第一版暂不支持 OCR" in text:
+            return "当前 PDF 可能是扫描版、图片型或加密 PDF，第一版暂不支持 OCR。"
+        return "操作失败：" + text
 
     def parse_urlencoded(self) -> dict[str, str]:
         length = int(self.headers.get("Content-Length", "0") or 0)
@@ -264,7 +313,8 @@ class ReadLevelHandler(BaseHTTPRequestHandler):
         filename, data = self.uploaded_file(form)
         title = form.getfirst("title", "")
         material = import_article_upload(filename, data, title)
-        self.redirect(f"/materials/{quote(material['id'])}?msg={quote('文章已导入，现在可以写笔记。')}")
+        msg = "这份资料已经导入过，已打开原资料。" if material.get("duplicated") else "文章已导入，现在可以写笔记。"
+        self.redirect(f"/materials/{quote(material['id'])}?msg={quote(msg)}")
 
     def action_import_article_text(self) -> None:
         form = self.parse_urlencoded()
@@ -273,14 +323,16 @@ class ReadLevelHandler(BaseHTTPRequestHandler):
         if not content:
             raise ValueError("文章内容不能为空")
         material = import_article_text(title, content)
-        self.redirect(f"/materials/{quote(material['id'])}?msg={quote('文章已导入，现在可以写笔记。')}")
+        msg = "这份资料已经导入过，已打开原资料。" if material.get("duplicated") else "文章已导入，现在可以写笔记。"
+        self.redirect(f"/materials/{quote(material['id'])}?msg={quote(msg)}")
 
     def action_import_pdf(self) -> None:
         form = self.parse_multipart()
         filename, data = self.uploaded_file(form)
         title = form.getfirst("title", "")
         material = import_pdf_upload(filename, data, title)
-        self.redirect(f"/materials/{quote(material['id'])}?msg={quote('PDF 已导入，现在可以写笔记。')}")
+        msg = "这份资料已经导入过，已打开原资料。" if material.get("duplicated") else "PDF 已导入，现在可以写笔记。"
+        self.redirect(f"/materials/{quote(material['id'])}?msg={quote(msg)}")
 
     def action_save_note(self, path: str) -> None:
         parts = path.strip("/").split("/")
@@ -289,6 +341,26 @@ class ReadLevelHandler(BaseHTTPRequestHandler):
         form = self.parse_urlencoded()
         save_note(mid, note_type, form.get("content", ""))
         self.redirect(f"/materials/{quote(mid)}?msg={quote('笔记已保存。')}")
+
+    def action_capture_note(self, path: str) -> None:
+        parts = path.strip("/").split("/")
+        mid = unquote(parts[2])
+        form = self.parse_urlencoded()
+        content = form.get("content", "")
+        source = get_source(mid)
+        note_type, label = classify_note_type(content, source_is_english(source))
+        append_note(mid, note_type, content)
+        self.redirect(f"/materials/{quote(mid)}?msg={quote('已归档到：' + label)}")
+
+    def action_delete_material(self, path: str) -> None:
+        parts = path.strip("/").split("/")
+        mid = unquote(parts[2])
+        try:
+            delete_material(mid)
+            rebuild_score_from_material_scores()
+            self.redirect(f"/materials?msg={quote('资料已删除。')}")
+        except Exception as exc:
+            self.redirect(f"/materials?msg={quote('删除失败：' + str(exc))}")
 
     def action_save_draft(self, path: str) -> None:
         parts = path.strip("/").split("/")
@@ -310,4 +382,3 @@ class ReadLevelHandler(BaseHTTPRequestHandler):
     def action_rebuild_score(self) -> None:
         rebuild_score_from_material_scores()
         self.redirect(f"/?msg={quote('已根据真实 score_growth.json 重新生成首页数据。')}")
-

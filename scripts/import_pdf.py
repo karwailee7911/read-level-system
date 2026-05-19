@@ -32,11 +32,13 @@ def main() -> None:
         raise SystemExit(f"PDF not found: {input_path}")
 
     material = import_pdf_upload(input_path.name, input_path.read_bytes(), args.title)
-    print(f"Imported PDF: {material['title']}")
+    if material.get("duplicated"):
+        print(f"Already imported: {material['title']}")
+    else:
+        print(f"Imported PDF: {material['title']}")
     print(f"Material page: http://127.0.0.1:8765/materials/{material['id']}")
     print(f"Local folder: data/materials/{material['id']}")
 
 
 if __name__ == "__main__":
     main()
-

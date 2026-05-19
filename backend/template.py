@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import re
+
 from backend.paths import TEMPLATE_DIR
 
 
@@ -8,5 +10,6 @@ def render_template(name: str, context: dict[str, str]) -> str:
     template = (TEMPLATE_DIR / name).read_text(encoding="utf-8")
     for key, value in context.items():
         template = template.replace("{{ " + key + " }}", value)
+        template = template.replace("{{" + key + "}}", value)
+    template = re.sub(r"\{\{\s*[\w_]+\s*\}\}", "", template)
     return template
-

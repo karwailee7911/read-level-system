@@ -26,6 +26,32 @@ python3 app.py
 http://127.0.0.1:8765
 ```
 
+## 一键启动
+
+第一次使用：
+
+```bash
+chmod +x start.command
+```
+
+以后使用：
+
+- 双击 `start.command`
+
+打开地址：
+
+```text
+http://127.0.0.1:8765
+```
+
+说明：
+
+- 这是本地网页，不是公网网站。
+- PDF、公众号文章、笔记都保存在本机 `data/` 目录。
+- `.gitignore` 已经阻止真实资料上传 GitHub。
+- 第一版只支持可复制文字的 PDF。
+- 扫描版、图片型、加密 PDF 暂不支持 OCR。
+
 ## 当前规则
 
 真实首页从空白开始：
@@ -33,7 +59,7 @@ http://127.0.0.1:8765
 - 没有导入资料：四项能力都是 0。
 - 没有个人理解、行动、草稿或英文练习：不加分。
 - 没有 `score_growth.json`：不自动评分。
-- `examples/` 里的 demo 不进入真实首页。
+- 项目从空白状态开始，不内置任何书籍或文章内容。
 
 ## 主要页面
 
@@ -74,8 +100,6 @@ read-level-system/
       drafts/
     scores/
       score.json
-  examples/
-    今日简史_demo/
 ```
 
 ## GitHub 上传说明
@@ -87,7 +111,6 @@ read-level-system/
 - 本地后端和前端代码
 - 能力规则和评分规则
 - 提示词模板
-- 示例资料 `examples/`
 - `score.example.json`
 - `user_profile.example.md`
 

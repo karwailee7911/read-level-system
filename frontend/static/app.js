@@ -10,4 +10,3 @@ document.addEventListener("click", (event) => {
     panel.hidden = panel.dataset.tabPanel !== tab;
   });
 });
-
