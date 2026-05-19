@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>导入资料</title>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+  <main class="shell">
+    <nav class="nav">
+      <a class="brand" href="/">Read Level System</a>
+      <div>
+        <a href="/materials">资料库</a>
+        <a href="/writing">写作</a>
+        <a href="/settings">目标设置</a>
+      </div>
+    </nav>
+
+    {{ message }}
+
+    <section class="hero compact">
+      <span class="eyebrow">导入资料</span>
+      <h1>先把资料放进系统，再开始写证据。</h1>
+      <p>导入只生成原文，不会自动加分。能力增长必须来自你后续写出的笔记、草稿和评分证据。</p>
+    </section>
+
+    <section class="grid two">
+      <article class="panel">
+        <h2>上传 PDF</h2>
+        <form method="post" action="/api/import/pdf" enctype="multipart/form-data" class="form">
+          <label>资料标题，可不填</label>
+          <input name="title" type="text" placeholder="例如：原则">
+          <label>PDF 文件</label>
+          <input name="file" type="file" accept=".pdf" required>
+          <button type="submit">导入 PDF</button>
+        </form>
+      </article>
+
+      <article class="panel">
+        <h2>上传公众号文章</h2>
+        <form method="post" action="/api/import/article" enctype="multipart/form-data" class="form">
+          <label>文章标题，可不填</label>
+          <input name="title" type="text" placeholder="默认读取文章标题">
+          <label>Markdown 或 txt 文件</label>
+          <input name="file" type="file" accept=".md,.txt" required>
+          <button type="submit">导入文章文件</button>
+        </form>
+      </article>
+    </section>
+
+    <section class="panel">
+      <h2>直接粘贴文章</h2>
+      <form method="post" action="/api/import/article-text" class="form">
+        <label>文章标题</label>
+        <input name="title" type="text" placeholder="例如：一篇关于商业判断的文章">
+        <label>文章内容</label>
+        <textarea name="content" rows="14" placeholder="把公众号文章正文粘贴到这里" required></textarea>
+        <button type="submit">导入粘贴内容</button>
+      </form>
+    </section>
+  </main>
+</body>
+</html>
+

@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>目标设置</title>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+  <main class="shell">
+    <nav class="nav">
+      <a class="brand" href="/">Read Level System</a>
+      <div>
+        <a href="/import">导入资料</a>
+        <a href="/materials">资料库</a>
+        <a href="/writing">写作</a>
+      </div>
+    </nav>
+    {{ message }}
+    <section class="hero compact">
+      <span class="eyebrow">目标设置</span>
+      <h1>这里改你的当前目标。</h1>
+      <p>前端叫“目标设置”，后端会保存到 config/user_profile.md 和 data/scores/score.json。</p>
+    </section>
+    <section class="panel">
+      <form method="post" action="/api/settings/profile" class="form">
+        <label>当前目标</label>
+        <textarea name="goal" rows="5">{{ goal }}</textarea>
+        <button type="submit">保存目标</button>
+      </form>
+    </section>
+    <section class="panel">
+      <h2>当前 profile 文件预览</h2>
+      <pre>{{ profile }}</pre>
+    </section>
+  </main>
+</body>
+</html>
+

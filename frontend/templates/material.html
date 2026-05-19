@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{{ title }}</title>
+  <link rel="stylesheet" href="/static/style.css">
+  <script defer src="/static/app.js"></script>
+</head>
+<body>
+  <main class="shell wide">
+    <nav class="nav">
+      <a class="brand" href="/">Read Level System</a>
+      <div>
+        <a href="/materials">资料库</a>
+        <a href="/import">导入资料</a>
+        <a href="/writing">写作</a>
+      </div>
+    </nav>
+    {{ message }}
+
+    <section class="hero compact">
+      <span class="eyebrow">{{ type }} · {{ imported_at }}</span>
+      <h1>{{ title }}</h1>
+      <p>这里才是你写东西的地方。导入的原文在左边，你自己的证据写在右边。</p>
+    </section>
+
+    <section class="workspace">
+      <aside class="source-panel">
+        <h2>原文预览</h2>
+        <pre>{{ source_preview }}</pre>
+      </aside>
+
+      <section class="editor-panel">
+        <div class="tabs">
+          <button type="button" data-tab="notes" class="active">结构化笔记</button>
+          <button type="button" data-tab="draft">文章草稿</button>
+        </div>
+
+        <div data-tab-panel="notes">
+          {{ note_editors }}
+        </div>
+
+        <div data-tab-panel="draft" hidden>
+          <section class="editor-card">
+            <h3>文章草稿</h3>
+            <form method="post" action="/api/materials/{{ id }}/outputs/draft">
+              <textarea name="content" rows="18" placeholder="把这份资料转成一段真实输出。">{{ draft }}</textarea>
+              <button type="submit">保存草稿</button>
+            </form>
+          </section>
+        </div>
+      </section>
+    </section>
+  </main>
+</body>
+</html>
+
