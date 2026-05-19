@@ -56,15 +56,9 @@ def import_article_upload(filename: str, data: bytes, title: str = "") -> dict:
 def load_pdf_reader():
     try:
         from pypdf import PdfReader  # type: ignore
-
         return PdfReader
-    except ImportError:
-        try:
-            from PyPDF2 import PdfReader  # type: ignore
-
-            return PdfReader
-        except ImportError as exc:
-            raise RuntimeError("缺少 PDF 解析依赖，请先安装 pypdf。") from exc
+    except ImportError as exc:
+        raise RuntimeError("缺少 PDF 解析依赖，请先运行：pip install -r requirements.txt") from exc
 
 
 def clean_pdf_text(text: str) -> str:
