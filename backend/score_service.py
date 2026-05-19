@@ -1,3 +1,8 @@
+#!/usr/bin/env python3
+"""
+Update score service to use simplified messaging that doesn't reference prompt files.
+"""
+
 from __future__ import annotations
 
 from typing import Any
@@ -10,7 +15,7 @@ from backend.utils import h, read_json, today, write_json
 ABILITIES = ["认知力", "表达力", "商业力", "英语力"]
 
 
-def empty_score(goal: str = "先导入第一份资料，再根据真实证据判断薄弱项。") -> dict[str, Any]:
+def empty_score(goal: str = "导入第一份资料后，系统才能判断你的薄弱项。") -> dict[str, Any]:
     return {
         "profile": {
             "goal": goal,
@@ -92,32 +97,32 @@ def dashboard_status(score: dict[str, Any]) -> dict[str, str]:
 
     if not materials:
         return {
-            "label": "还没有导入资料",
-            "ability": "暂不判断",
-            "confidence": "none",
-            "reason": "系统没有任何真实资料，因此不能判断薄弱项，也不能给任何能力加分。",
-            "next_task": "先导入第一份 PDF 或公众号文章。",
-            "evidence": "<p class=\"empty\">暂无证据。</p>",
+            "label": "准备开始",
+            "ability": "—",
+            "confidence": "评分准度：—",
+            "reason": "导入第一份资料后，系统才能判断你的薄弱项。",
+            "next_task": "导入 PDF 或公众号文章",
+            "evidence": "<p class=\"empty\">暂无。</p>",
         }
 
     if not has_evidence:
         return {
-            "label": "已有资料，但还没有个人证据",
-            "ability": "暂不判断",
-            "confidence": "none",
-            "reason": "你已经导入资料，但还没有写个人理解、行动清单、草稿或英文练习。此时不能判断薄弱项。",
-            "next_task": "打开一份资料，先写“与我现实有关的启发”。",
-            "evidence": "<p class=\"empty\">暂无可评分证据。</p>",
+            "label": "已有资料",
+            "ability": "—",
+            "confidence": "评分准度：—",
+            "reason": "你已导入资料，现在需要写出个人理解和行动才能开始评分。",
+            "next_task": "打开资料，记录对你有启发的地方",
+            "evidence": "<p class=\"empty\">暂无。</p>",
         }
 
     if not ai_weakness:
         return {
-            "label": "已有证据，等待 AI 评分",
-            "ability": "暂未评分",
-            "confidence": "none",
-            "reason": "系统发现你已经写了内容，但还没有生成 score_growth.json，因此不自动加分。",
-            "next_task": "用 prompts/score_growth.md 对本次资料做一次保守评分。",
-            "evidence": "<p class=\"empty\">已有笔记或草稿，但还没有评分证据。</p>",
+            "label": "等待评分",
+            "ability": "—",
+            "confidence": "评分准度：—",
+            "reason": "已发现你的笔记，现在正待评分生成成长数据。",
+            "next_task": "继续导入更多资料，丰富评分样本",
+            "evidence": "<p class=\"empty\">暂无。</p>",
         }
 
     evidence = ai_weakness.get("evidence", [])
@@ -126,11 +131,12 @@ def dashboard_status(score: dict[str, Any]) -> dict[str, str]:
             f"<li>{h(item)}</li>" for item in evidence
         ) + "</ul>"
     else:
-        evidence_html = "<p class=\"empty\">暂无证据。</p>"
+        evidence_html = "<p class=\"empty\">暂无。</p>"
+    confidence_text = ai_weakness.get("confidence", "unknown")
     return {
-        "label": "AI 已根据证据判断",
-        "ability": ai_weakness.get("ability", "暂未评分"),
-        "confidence": ai_weakness.get("confidence", "unknown"),
+        "label": "AI 已评分",
+        "ability": ai_weakness.get("ability", "—"),
+        "confidence": f"评分准度：{confidence_text}",
         "reason": ai_weakness.get("reason", ""),
         "next_task": ai_weakness.get("next_task", ""),
         "evidence": evidence_html,
