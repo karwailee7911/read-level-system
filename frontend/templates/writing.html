@@ -19,17 +19,16 @@
     {{ message }}
     <section class="hero compact">
       <span class="eyebrow">写作</span>
-      <h1>这里写不绑定某一份资料的草稿。</h1>
-      <p>如果草稿来自某份资料，建议去那份资料的处理页写。</p>
+      <h1>不绑定资料的草稿</h1>
+      <p>如果是针对某份资料的输出，建议在那份资料的处理页里写。</p>
     </section>
     <section class="panel">
       <form method="post" action="/api/writing/inbox" class="form">
-        <label>草稿 inbox.md</label>
-        <textarea name="content" rows="18" placeholder="写一个临时草稿。">{{ draft }}</textarea>
+        <label>Inbox 草稿</label>
+        <textarea name="content" rows="18" placeholder="临时草稿，保存后变成 Markdown 文件。">{{ draft }}</textarea>
         <button type="submit">保存草稿</button>
       </form>
     </section>
   </main>
 </body>
 </html>
-
